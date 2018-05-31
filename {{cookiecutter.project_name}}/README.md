@@ -5,12 +5,10 @@ This is a sample template for {{ cookiecutter.project_name }} - Below is a brief
 ```bash
 .
 ├── README.md                   <-- This instructions file
-├── hello_world                 <-- Source code for a lambda function
-│   ├── app.js                  <-- Lambda function code
+├── alexa_skill                 <-- Source code for a lambda function
+│   ├── http.js                 <-- API Gateway Proxy Lambda function code
+│   ├── skill.js                <-- Alexa Skill Lambda function code
 │   ├── package.json            <-- NodeJS dependencies
-│   └── tests                   <-- Unit tests
-│       └── unit
-│           └── test_handler.js
 └── template.yaml               <-- SAM template
 ```
 
@@ -33,7 +31,7 @@ This is a sample template for {{ cookiecutter.project_name }} - Below is a brief
 In this example we use `npm` but you can use `yarn` if you prefer to manage NodeJS dependencies:
 
 ```bash
-cd hello_world
+cd alexa_skill
 npm install
 cd ../
 ```
@@ -46,17 +44,17 @@ cd ../
 sam local start-api
 ```
 
-If the previous command ran successfully you should now be able to hit the following local endpoint to invoke your function `http://localhost:3000/hello`
+If the previous command ran successfully you should now be able to hit the following local endpoint to invoke your function `http://localhost:3000/`
 
 **SAM CLI** is used to emulate both Lambda and API Gateway locally and uses our `template.yaml` to understand how to bootstrap this environment (runtime, where the source code is, etc.) - The following excerpt is what the CLI will read in order to initialize an API and its routes:
 
 ```yaml
 ...
 Events:
-    HelloWorld:
-        Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+    HttpProxy:
+        Type: Api
         Properties:
-            Path: /hello
+            Path: /
             Method: get
 ```
 
@@ -69,7 +67,7 @@ AWS Lambda NodeJS runtime requires a flat folder with all dependencies including
     FirstFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: hello_world/
+            CodeUri: alexa_skill/
             ...
 ```
 
@@ -105,14 +103,14 @@ After deployment is complete you can run the following command to retrieve the A
 aws cloudformation describe-stacks \
     --stack-name {{ cookiecutter.project_name.lower().replace(' ', '-') }} \
     --query 'Stacks[].Outputs'
-``` 
+```
 
 ## Testing
 
 We use `jest` for testing our code and it is already added in `package.json` under `scripts`, so that we can simply run the following command to run our tests:
 
 ```bash
-cd hello_world
+cd alexa_skill
 npm run test
 ```
 
@@ -144,7 +142,7 @@ aws cloudformation describe-stacks \
 
 Here are a few ideas that you can use to get more acquainted as to how this overall process works:
 
-* Create an additional API resource (e.g. /hello/{proxy+}) and return the name requested through this new path
+* Create an additional API resource (e.g. /{proxy+}) and return the name requested through this new path
 * Update unit test to capture that
 * Package & Deploy
 
