@@ -14,7 +14,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/custom/
-      Handler: index.handler
+      Handler: index.http_handler
       {%- if cookiecutter.runtime == 'nodejs6.10' %}
       Runtime: nodejs6.10
       {%- elif cookiecutter.runtime =='nodejs4.3' %}
@@ -22,3 +22,9 @@ Resources:
       {%- else %}
       Runtime: nodejs8.10
       {%- endif %}
+      Events:
+        HttpProxy:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post

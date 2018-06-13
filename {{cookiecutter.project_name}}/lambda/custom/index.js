@@ -1,20 +1,21 @@
-'use strict';
+/* eslint-disable  func-names */
+/* eslint-disable  no-console */
 
-const Alexa = require('ask-sdk');
+const Alexa = require('ask-sdk-core');
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const speechText = 'Welcome to the Alexa Workshop.  Please ask me to say Hello World!';
+    const speechText = 'Welcome to the Alexa Skills Kit, you can say hello!';
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
       .withSimpleCard('Hello World', speechText)
       .getResponse();
-  }
+  },
 };
 
 const HelloWorldIntentHandler = {
@@ -23,13 +24,13 @@ const HelloWorldIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'HelloWorldIntent';
   },
   handle(handlerInput) {
-    const speechText = `Hello World!`;
+    const speechText = 'Hello World!';
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .withSimpleCard('Hello World', speechText)
       .getResponse();
-  }
+  },
 };
 
 const HelpIntentHandler = {
@@ -38,14 +39,14 @@ const HelpIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
-    const speechText = 'You can say spin the wheel to me!';
+    const speechText = 'You can say hello to me!';
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
       .withSimpleCard('Hello World', speechText)
       .getResponse();
-  }
+  },
 };
 
 const CancelAndStopIntentHandler = {
@@ -61,7 +62,7 @@ const CancelAndStopIntentHandler = {
       .speak(speechText)
       .withSimpleCard('Hello World', speechText)
       .getResponse();
-  }
+  },
 };
 
 const SessionEndedRequestHandler = {
@@ -69,9 +70,10 @@ const SessionEndedRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'SessionEndedRequest';
   },
   handle(handlerInput) {
-    //any cleanup logic goes here
+    console.log(`Session ended with reason: ${handlerInput.requestEnvelope.request.reason}`);
+
     return handlerInput.responseBuilder.getResponse();
-  }
+  },
 };
 
 const ErrorHandler = {
@@ -90,7 +92,7 @@ const ErrorHandler = {
 
 const skillBuilder = Alexa.SkillBuilders.custom();
 
-exports.lambda_handler = skillBuilder
+exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
     HelloWorldIntentHandler,
@@ -100,3 +102,28 @@ exports.lambda_handler = skillBuilder
   )
   .addErrorHandlers(ErrorHandler)
   .lambda();
+
+exports.http_handler = (event, context, callback) => {
+    try {
+        const body = JSON.parse(event.body);
+
+        exports.handler(body, context, function(err, data) {
+            if (err) {
+                callback(null, {
+                    statusCode: 200,
+                    body: JSON.stringify(err)
+                });
+            } else {
+                callback(null, {
+                    statusCode: 200,
+                    headers: {
+                        "Content-Type": "application/json;charset=UTF-8"
+                    },
+                    body: JSON.stringify(data)
+                });
+            };
+        });
+    } catch (err) {
+        callback(err);
+    }
+};
